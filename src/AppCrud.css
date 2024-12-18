@@ -7,6 +7,9 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-image: url('https://blog.mystrika.com/wp-content/uploads/sites/8/2024/02/write_Time_Interval_in_background_using_smoke_.jpg');
+    background-size: cover;
+    background-position: center;
   }
   
   .app {
@@ -35,7 +38,14 @@ body {
     border: 1px solid #ddd;
     border-radius: 5px;
   }
-  
+  .timebox{
+    padding: 8px 10px;
+    margin: 10px 0;
+    width: 20%;
+    max-width: 200px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+  }
   button {
     background-color: #007bff;
     color: #fff;
@@ -51,10 +61,10 @@ body {
     background-color: #0056b3;
   }
   
-  button:disabled {
+  /* button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-  }
+  } */
   .task-list {
     margin-top: 20px;
   }
@@ -115,4 +125,7 @@ body {
     font-size: 48px;
     color: #333;
   }
+  
+
+  
   
