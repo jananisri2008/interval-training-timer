@@ -1,38 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./AppCrud.css";
+// import "./AppCrud.css";
 
 function AppCrud() {
-  // Task Management State
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     name: "",
-    workHours: "",
-    workMinutes: "",
-    workSeconds: "",
+    workHours: 0,
+    workMinutes: 0,
+    workSeconds: 0,
     category: "",
   });
-  const [editingTaskId, setEditingTaskId] = useState(null);
-
-  // Category Management State
   const [categories, setCategories] = useState(["Work", "Rest"]);
-
-  // Timer State
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null); // Tracks selected task in dropdown
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
-  const [isWorkPhase, setIsWorkPhase] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
 
   const intervalRef = useRef(null);
 
-  // Handle Timer Logic
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            setIsWorkPhase((prevPhase) => !prevPhase);
-            const task = tasks.find((t) => t.id === currentTaskId);
-            return task.workDuration;
+            return 0;
           }
           return prev - 1;
         });
@@ -42,9 +34,8 @@ function AppCrud() {
     }
 
     return () => clearInterval(intervalRef.current);
-  }, [isRunning, currentTaskId, tasks]);
+  }, [isRunning]);
 
-  // CRUD Handlers
   const addOrUpdateTask = () => {
     const workDuration =
       newTask.workHours * 3600 +
@@ -81,6 +72,7 @@ function AppCrud() {
   const deleteTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
     if (currentTaskId === id) resetTimer();
+    if (selectedTaskId === id) setSelectedTaskId(null); // Clear selection if task is deleted
   };
 
   const editTask = (task) => {
@@ -94,13 +86,11 @@ function AppCrud() {
     setEditingTaskId(task.id);
   };
 
-  // Timer Handlers
   const startTimer = (id) => {
     setCurrentTaskId(id);
     const task = tasks.find((t) => t.id === id);
     setTimeLeft(task.workDuration);
     setIsRunning(true);
-    setIsWorkPhase(true);
   };
 
   const stopTimer = () => {
@@ -121,24 +111,23 @@ function AppCrud() {
     return `${hrs}:${mins}:${secs}`;
   };
 
+  const handleDropdownChange = (event) => {
+    const selectedId = event.target.value;
+    setSelectedTaskId(selectedId === "none" ? null : Number(selectedId));
+  };
+
   return (
     <div className="app">
       <h1>Interval Training Timer</h1>
 
       {/* Task Form */}
-       {/* Add a new category dynamically */}
-      
-
       <div className="task-form">
-      <input
+        <input
           type="text"
           className="textbox"
-          placeholder="Enter The Tasks."
-          onBlur={(e) => {
-            if (e.target.value && !categories.includes(e.target.value)) {
-              setCategories([...categories, e.target.value]);
-            }
-          }}
+          placeholder="Task Name"
+          value={newTask.name}
+          onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
         />
         <div className="time-inputs">
           <input
@@ -169,71 +158,48 @@ function AppCrud() {
             }
           />
         </div>
-
+       
         <button onClick={addOrUpdateTask}>
           {editingTaskId !== null ? "Update Task" : "Add Task"}
         </button>
-        <br/>
+      </div>
 
-        {/* Dropdown for Task Category */}
-        <select
-          value={newTask.category}
-          onChange={(e) =>
-            setNewTask({ ...newTask, category: e.target.value })
-          }
-        >
-          <option value="">
-            Select Task 
-          </option>
-          {categories.map((category, index) => (
-            <option key={index} value={category}>
-              {category}
+      {/* Dropdown for Selecting Task */}
+      <div className="task-dropdown">
+        <select onChange={handleDropdownChange}>
+          <option value="none">Select a Task</option>
+          {tasks.map((task) => (
+            <option key={task.id} value={task.id}>
+              {task.name}
             </option>
           ))}
-        </select>       
+        </select>
       </div>
 
-      {/* Task List */}
-      <div className="task-list">
-        {tasks.map((task) => (
-          <div key={task.id} className="task-item">
-            <h3>{task.name}</h3>
-            <p>Duration: {formatTime(task.workDuration)}</p>
-            <p>Category: {task.category}</p>
-            <div>
-              <button
-                onClick={() => startTimer(task.id)}
-                className="startbtn"
-              >
-                Start
-              </button>
-              <button
-                onClick={() => editTask(task)}
-                className="editbtn"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="deletebtn"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Timer Display */}
-      {currentTaskId && (
-        <div className="timer-display">
-          <h1>{formatTime(timeLeft)}</h1>
-          <button onClick={stopTimer} className="stopbtn">
-            Pause
-          </button>
-          <button onClick={resetTimer} className="resetbtn">
-            Reset
-          </button>
+      {/* Selected Task Details */}
+      {selectedTaskId && (
+        <div className="task-details">
+          {tasks
+            .filter((task) => task.id === selectedTaskId)
+            .map((task) => (
+              <div key={task.id}>
+                {/* <h3>{task.name}</h3> */}
+                <p>Duration: {formatTime(task.workDuration)}</p>
+                <p>Category: {task.name || "None"}</p>
+                <button onClick={() => startTimer(task.id)} className="startbtn">
+                  Start
+                </button>
+                <button onClick={() => editTask(task)} className="editbtn">
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="deletebtn"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
         </div>
       )}
     </div>
@@ -241,3 +207,4 @@ function AppCrud() {
 }
 
 export default AppCrud;
+

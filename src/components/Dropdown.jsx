@@ -1,27 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; 
+
 function Dropdown() {
   const initialDropdownData = ["Item 1", "Item 2", "Item 3"];
   const [dropdown, setDropdown] = useState([]);
   const [newItem, setNewItem] = useState("");
+  const [selectedItem, setSelectedItem] = useState(""); // State to hold selected item
+
   useEffect(() => {
     loadData();
   }, []);
+
   function loadData() {
     setDropdown(initialDropdownData);
   }
+
   function addItem() {
     if (newItem.trim() !== "" && !dropdown.includes(newItem)) {
       setDropdown([...dropdown, newItem]);
       setNewItem(""); // Clear the input field
     }
   }
+
+  // Handler to update selected item
+  function handleSelectionChange(e) {
+    setSelectedItem(e.target.value);
+  }
+
   return (
     <div className="dropdown">
-      <select>
+      <select onChange={handleSelectionChange} value={selectedItem}>
+        <option value="">Select an item</option>
         {dropdown.map((item, index) => (
-          <option key={index}>{item}</option>
+          <option key={index} value={item}>
+            {item}
+          </option>
         ))}
       </select>
+      {selectedItem && <div className="item-details">Details of {selectedItem}</div>}
+
       <div className="add-item">
         <input
           type="text"
@@ -34,16 +50,5 @@ function Dropdown() {
     </div>
   );
 }
+
 export default Dropdown;
-
-
-
-
-
-
-
-
-
-
-
-
