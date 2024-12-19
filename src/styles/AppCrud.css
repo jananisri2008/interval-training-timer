@@ -127,6 +127,22 @@ body {
     color: #333;
   }
   
-
+  .timebox-wrapper {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+  }
+  
+  .timebox {
+    width: 60px;
+    margin-right: 5px;
+    text-align: center;
+  }
+  
+  .time-label {
+    font-size: 14px;
+    color: #555;
+  }
+  
   
   

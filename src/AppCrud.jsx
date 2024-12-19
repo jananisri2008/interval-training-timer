@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-// import "./AppCrud.css";
 
 function AppCrud() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     name: "",
-    workHours: 0,
-    workMinutes: 0,
-    workSeconds: 0,
+    workHours: "",
+    workMinutes:"",
+    workSeconds: "",
     category: "",
   });
-  const [categories, setCategories] = useState(["Work", "Rest"]);
+  const [categories, setCategories] = useState([""]);
   const [editingTaskId, setEditingTaskId] = useState(null);
-  const [selectedTaskId, setSelectedTaskId] = useState(null); // Tracks selected task in dropdown
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -21,9 +20,12 @@ function AppCrud() {
 
   useEffect(() => {
     if (isRunning) {
+      clearInterval(intervalRef.current); 
       intervalRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
+            clearInterval(intervalRef.current);
+            setIsRunning(false);
             return 0;
           }
           return prev - 1;
@@ -62,9 +64,9 @@ function AppCrud() {
 
     setNewTask({
       name: "",
-      workHours: 0,
-      workMinutes: 0,
-      workSeconds: 0,
+      workHours: "",
+      workMinutes: "",
+      workSeconds: "",
       category: "",
     });
   };
@@ -72,7 +74,7 @@ function AppCrud() {
   const deleteTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
     if (currentTaskId === id) resetTimer();
-    if (selectedTaskId === id) setSelectedTaskId(null); // Clear selection if task is deleted
+    if (selectedTaskId === id) setSelectedTaskId(null);
   };
 
   const editTask = (task) => {
@@ -87,10 +89,12 @@ function AppCrud() {
   };
 
   const startTimer = (id) => {
-    setCurrentTaskId(id);
     const task = tasks.find((t) => t.id === id);
-    setTimeLeft(task.workDuration);
-    setIsRunning(true);
+    if (task) {
+      setCurrentTaskId(id);
+      setTimeLeft(task.workDuration);
+      setIsRunning(true);
+    }
   };
 
   const stopTimer = () => {
@@ -158,13 +162,12 @@ function AppCrud() {
             }
           />
         </div>
-       
         <button onClick={addOrUpdateTask}>
           {editingTaskId !== null ? "Update Task" : "Add Task"}
         </button>
       </div>
 
-      {/* Dropdown for Selecting Task */}
+      {/* Dropdown */}
       <div className="task-dropdown">
         <select onChange={handleDropdownChange}>
           <option value="none">Select a Task</option>
@@ -176,17 +179,19 @@ function AppCrud() {
         </select>
       </div>
 
-      {/* Selected Task Details */}
       {selectedTaskId && (
         <div className="task-details">
           {tasks
             .filter((task) => task.id === selectedTaskId)
             .map((task) => (
               <div key={task.id}>
-                {/* <h3>{task.name}</h3> */}
                 <p>Duration: {formatTime(task.workDuration)}</p>
-                <p>Category: {task.name || "None"}</p>
-                <button onClick={() => startTimer(task.id)} className="startbtn">
+                <p>Category: {task.name|| "None"}</p>
+                <button
+                  onClick={() => startTimer(task.id)}
+                  className="startbtn"
+                  // disabled={isRunning && currentTaskId === task.id}
+                >
                   Start
                 </button>
                 <button onClick={() => editTask(task)} className="editbtn">
@@ -202,9 +207,21 @@ function AppCrud() {
             ))}
         </div>
       )}
+
+      {/* Timer Display */}
+      {currentTaskId && (
+        <div className="timer-display">
+          <h2>Current Task Time: {formatTime(timeLeft)}</h2>
+          <button onClick={stopTimer} className="stopbtn">
+            Stop
+          </button>
+          <button onClick={resetTimer} className="resetbtn">
+            Reset
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 export default AppCrud;
-
